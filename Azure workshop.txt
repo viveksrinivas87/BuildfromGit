@@ -1,0 +1,360 @@
+Enable Preview Features
+
+Use Case 1
+Defalut Job
+
+trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- script: echo Hello, world! Changed
+  displayName: 'Run a one-line script'
+
+- script: |
+    echo Add other tasks to build, test, and deploy your project.
+    echo See https://aka.ms/yaml
+  displayName: 'Run a multi-line scripts'
+
+_______________________________________________________________________________________________________________________
+Use Case 2
+Expriencce  with Jobs
+
+Jobs are running parallel
+Job 1 and 1 are running different agents (Agents are virtual servers)
+
+trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-latest'
+jobs:
+- job: job1
+  steps:
+  - script: echo Job1 - Hello, world! Changed
+    displayName: 'Run a one-line script'
+
+  - script: |
+      echo Add other tasks to build, test, and deploy your project.
+      echo See https://aka.ms/yaml
+    displayName: 'Run a multi-line scripts'
+- job: job2
+  steps:
+  - script: echo Job2
+    displayName: 'Run a one-line script'
+_______________________________________________________________________________________________________________________
+Use Case 3
+
+Jobs : Using Depends on with Jobs
+
+trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-latest'
+jobs:
+- job: job1
+  steps:
+  - script: echo Job1 - Hello, world! Changed
+    displayName: 'Run a one-line script'
+
+  - script: |
+      echo Add other tasks to build, test, and deploy your project.
+      echo See https://aka.ms/yaml
+    displayName: 'Run a multi-line scripts'
+- job: job2
+  dependsOn: job1
+  steps:
+  - script: echo Job2
+    displayName: 'Run a one-line script'
+- job: job3
+  dependsOn: job2
+  steps:
+  - script: echo Job3
+    displayName: 'Run a one-line script'
+_______________________________________________________________________________________________________________________
+Use Case 4
+
+Mutilple depends 
+
+Job4 Depends on Job2 and Job3
+
+trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-latest'
+jobs:
+- job: job1
+  steps:
+  - script: echo Job1 - Hello, world! Changed
+    displayName: 'Run a one-line script'
+
+  - script: |
+      echo Add other tasks to build, test, and deploy your project.
+      echo See https://aka.ms/yaml
+    displayName: 'Run a multi-line scripts'
+- job: job2
+  dependsOn: job1
+  steps:
+  - script: echo Job2
+    displayName: 'Run a one-line script'
+- job: job3
+  dependsOn: job2
+  steps:
+  - script: echo Job3
+    displayName: 'Run a one-line script'
+- job: job4
+  dependsOn:
+  - job2
+  - job3
+  steps:
+  - script: echo Job 4
+    displayName: 'Run a one-line script'
+_________________________________________________________________________________________________________________
+
+Use Case 5
+Creating Azure Pipeline for playing with stages
+
+Rename the pipeline
+
+Create new pipeline
+
+
+trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-latest'
+stages:
+- stage: Build
+  jobs:
+    - job: firstjob
+      steps:
+      - bash: echo Build First Job
+    - job: SecondJob
+      steps:
+      - bash: echo Build Second Job
+- stage: DevDeploy
+  jobs:
+    - job: DevFist
+      steps:
+      - bash: echo Dev First Job
+    - job: DevSeccond
+      steps:
+      - bash: echo Dev Second Job
+- stage: QADeploy
+  jobs:
+    - job: QAJob
+      steps:
+      - bash: echo QA First Job
+- stage: ProdDeploy
+  jobs:
+    - job: ProductionsJob
+      steps:
+      - bash: echo Production First Job
+_____________________________________________________________________________________________________________________
+Use Case 6
+Creating stage with depends
+
+After deploy Build stages, we would like to have paralleling running on DevStage and QAStage
+
+ProdStage would like to run after complete of DevStage and QAStage
+
+trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-latest'
+stages:
+- stage: Build
+  jobs:
+    - job: firstjob
+      steps:
+      - bash: echo Build First Job
+    - job: SecondJob
+      steps:
+      - bash: echo Build Second Job
+- stage: DevDeploy
+  dependsOn: Build
+  jobs:
+    - job: DevFist
+      steps:
+      - bash: echo Dev First Job
+    - job: DevSeccond
+      steps:
+      - bash: echo Dev Second Job
+- stage: QADeploy
+  dependsOn: Build
+  jobs:
+    - job: QAJob
+      steps:
+      - bash: echo QA First Job
+- stage: ProdDeploy
+  dependsOn:
+  - DevDeploy
+  - QADeploy
+  jobs:
+    - job: ProductionsJob
+      steps:
+      - bash: echo Production First Job
+________________________________________________________________________________________________________________________
+
+Use Case 7
+
+Playing with variables and depend on Stages
+
+Stages are a build and creating artifacts
+
+Variables helps in making the entire pipeline configuration Dynamic. 
+You can configure variable at Pipeline level
+
+More details do serach Google at "pipeline variables azure devops" and choose Use predefined variables web page
+
+Create variable and name as a enviroment. Refer word doc for images
+
+trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-latest'
+stages:
+- stage: Build
+  jobs:
+    - job: firstjob
+      steps:
+      - bash: echo Build First Job
+    - job: SecondJob
+      steps:
+      - bash: echo Build Second Job
+- stage: DevDeploy
+  variables:
+    environment: Dev
+  dependsOn: Build
+  jobs:
+    - job: DevFist
+      steps:
+      - bash: echo $(enviroment)DeployJob
+    - job: DevSeccond
+      steps:
+      - bash: echo Dev Second Job
+- stage: QADeploy
+  variables:
+     environment: 
+  dependsOn: Build
+  jobs:
+    - job: QAJob
+      steps:
+      - bash: echo $(enviroment)QADeploy
+- stage: ProdDeploy
+  dependsOn:
+  - DevDeploy
+  - QADeploy
+  jobs:
+    - job: ProductionsJob
+      steps:
+      - bash: echo $(enviroment)ProdDeploy
+**************************************************************************************************************************
+Use Case 8
+
+Pre Defined Variables
+
+trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-latest'
+stages:
+- stage: Build
+  jobs:
+    - job: firstjob
+      steps:
+      - bash: echo Build First Job
+      - bash: echo $(pipelineLevelVariable)
+      - bash: echo $(Build.BuildNumber)
+      - bash: echo $(Build.BuildId)
+      - bash: echo $(Build.SourceBranchName)
+      - bash: echo $(Build.SourcesDirectory)
+      - bash: echo $(System.DefaultWorkingDirectory)
+      - bash: ls -r  $(System.DefaultWorkingDirectory)
+      - bash: echo $(Build.ArtifactStagingDirectory)
+*************************************************************************************************************************
+Use Case 9
+
+Publish Artifacts
+
+trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-latest'
+stages:
+- stage: Build
+  jobs:
+    - job: firstjob
+      steps:
+      - bash: echo Build First Job
+      - bash: echo $(pipelineLevelVariable)
+      - bash: echo $(Build.BuildNumber)
+      - bash: echo $(Build.BuildId)
+      - bash: echo $(Build.SourceBranchName)
+      - bash: echo $(Build.SourcesDirectory)
+      - bash: echo $(System.DefaultWorkingDirectory)
+      - bash: ls -R  $(System.DefaultWorkingDirectory)
+      - bash: echo $(System.DefaultWorkingDirectory)
+      - bash: echo $(Build.ArtifactStagingDirectory)
+      - bash: java -version
+      - bash: node --version
+      - bash: python --version
+      - bash: mvn -version
+      - bash: ls -R $(Build.ArtifactsStagingDirectory)
+      - task: CopyFiles@2
+        inputs:
+          SourceFolder: '$(System.DefaultWorkingDirectory)'
+          Contents: |
+            **/*.yml
+            **/*.java
+          TargetFolder: '$(Build.ArtifactsStagingDirectory)'
+      - bash: ls -R $(Build.ArtifactsStagingDirectory)
+      - task: PublishBuildArtifacts@1
+        inputs:
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+          ArtifactName: 'drop'
+          publishLocation: 'Container'
+**********************************************************************************************************************
+Use Case 10
+
+Jobs on Multiple Agents 
+
+Using strategy and understand about environment
+
+I want to run the same build with multiple O/S, would like to run at Ubuntu and Mac
+
+trigger:
+- master
+
+strategy:
+  matrix:
+    linux:
+      operatingSystem: 'ubuntu-latest'
+    mac:
+      operatingSystem: 'macos-latest'
+pool:
+  vmImage: $(operatingSystem)
+
+steps:
+- script: echo Running on $(operatingSystem)
+  displayName: 'Run a one-line script'
+
+************************************************************************************************************************
+
+
+
+
+
+
+
+
+
