@@ -13,7 +13,7 @@ strategy:
     mac:
       operatingSystem: 'macos-latest'
     windows:
-      operatingSystem: 'windows'
+      operatingSystem: 'windows-latest'
 pool:
   vmImage: $(operatingSystem)
 
