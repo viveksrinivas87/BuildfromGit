@@ -34,7 +34,6 @@ stages:
       - bash: echo QA First Job
 - stage: ProdDeploy
   dependsOn:
-  - DevDeploy
   - QADeploy
   jobs:
     - job: ProductionsJob
